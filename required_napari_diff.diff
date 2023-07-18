@@ -1,0 +1,31 @@
+diff --git a/examples/multiscale_mandelbulb.py b/examples/multiscale_mandelbulb.py
+index e6944c7b..b254821d 100644
+--- a/examples/multiscale_mandelbulb.py
++++ b/examples/multiscale_mandelbulb.py
+@@ -83,3 +83,4 @@ if __name__ == "__main__":
+     )
+ 
+     viewer.axes.visible = True
++    napari.run()
+diff --git a/napari/experimental/_progressive_loading.py b/napari/experimental/_progressive_loading.py
+index 24309a03..a8dedf81 100644
+--- a/napari/experimental/_progressive_loading.py
++++ b/napari/experimental/_progressive_loading.py
+@@ -509,7 +509,7 @@ def dims_update_handler(invar, data=None, viewer=None, ndisplay=None):
+ 
+ 
+ def add_progressive_loading_image(
+-    img, viewer=None, contrast_limits=[0, 255], colormap='PiYG', ndisplay=2
++    img, viewer=None, contrast_limits=[0, 255], colormap='PiYG', ndisplay=2, rendering="attenuated_mip",
+ ):
+     """Add tiled multiscale image."""
+     # initialize multiscale virtual data (generate scale factors, translations,
+@@ -574,7 +574,7 @@ def add_progressive_loading_image(
+             name=get_layer_name_for_scale(scale),
+             colormap=colormap,
+             scale=multiscale_data._scale_factors[scale],
+-            rendering="attenuated_mip",
++            rendering=rendering,
+         )
+         layers[scale] = layer
+         layer.metadata["translated"] = False
