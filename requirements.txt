@@ -1,0 +1,5 @@
+yt[full]
+numba
+zarr
+napari
+pyQT5

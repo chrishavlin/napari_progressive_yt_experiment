@@ -29,6 +29,7 @@ class YTStore(MandelbulbStore):
             compressor=None, order=4,
             use_yt_load_sample=False,
             take_log=True,
+            cmap_limits=None,
     ):
 
         # need to copy/pase rather than override cause of the d-type handling here
@@ -52,13 +53,17 @@ class YTStore(MandelbulbStore):
         self.max_coord = 1.0
         self.min_coord = 0.0
         self.take_log = take_log
+        self.cmap_limits = cmap_limits
         self.data_min, self.data_max = self.find_field_range()
 
     def find_field_range(self):
-        ad = self.ds.all_data()
-        min_field, max_field = ad.quantities.extrema(self.field)
-        min_field = min_field.d
-        max_field = max_field.d
+        if self.cmap_limits is None:
+            ad = self.ds.all_data()
+            min_field, max_field = ad.quantities.extrema(self.field)
+            min_field = min_field.d
+            max_field = max_field.d
+        else:
+            min_field, max_field = self.cmap_limits
         if self.take_log:
             min_field = np.log10(min_field)
             max_field = np.log10(max_field)
@@ -94,6 +99,9 @@ class YTStore(MandelbulbStore):
         data = frb[self.field]
         if self.take_log:
             data = np.log10(data)
+
+        data[data<self.data_min] = self.data_min
+        data[data>self.data_max] = self.data_max
 
         data = (data - self.data_min) / (self.data_max - self.data_min)
         # data = np.random.random((self.tilesize, self.tilesize, self.tilesize))
@@ -132,7 +140,8 @@ def random_np_generative_ds(max_levels=10):
 
     return arrays
 
-def yt_dataset(max_levels=8):
+def yt_dataset(max_levels=8, ds_name="IsolatedGalaxy", field=("enzo", "Density"),
+               cmap_limits = None):
     """Generate a multiscale image of the yt dataset set for a given number
     of levels/scales. Scale 0 will be the highest resolution.
 
@@ -160,12 +169,13 @@ def yt_dataset(max_levels=8):
     # Initialize the store
     # yt_store = YTStore("IsolatedGalaxy", ("enzo", "Density"), 6, 32, use_yt_load_sample=True, take_log=False)    
     store = zarr.storage.KVStore(
-        YTStore("IsolatedGalaxy", 
-                ("enzo", "Density"), 
+        YTStore(ds_name,
+                field,
                 max_levels, 
                 32, 
                 use_yt_load_sample=True, 
-                take_log=True)
+                take_log=True,
+                cmap_limits=cmap_limits)
     )
     # Wrap in a cache so that tiles don't need to be computed as often
     # store = zarr.LRUStoreCache(store, max_size=8e9)

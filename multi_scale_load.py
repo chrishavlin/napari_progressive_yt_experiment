@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     viewer = napari.Viewer(ndisplay=3)
 
-    multiscale_img = yt_dataset(max_levels=10)
+    multiscale_img = yt_dataset(max_levels=15, ds_name="DeeplyNestedZoom", cmap_limits=(1e-1, 1e3))
     # multiscale_img = random_np_generative_ds()
     print(multiscale_img[0])
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         multiscale_img,
         viewer=viewer,
         contrast_limits=[0, 1],
-        colormap='viridis',
+        colormap='magma',
         ndisplay=3,
         rendering='mip',
     )
